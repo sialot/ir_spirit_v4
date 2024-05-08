@@ -5,6 +5,7 @@
 //    板载led灯状态展示
 // v4 完善界面,添加操作提示，修复任何状态都能进入录制的问题
 // v4.5 修复录制时间遇到重复码，计算间隔不准确的问题
+// v5 故意降低录制灵敏性，恢复接收指令间隔不能小于200毫秒
 #include <Arduino.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
@@ -151,7 +152,7 @@ void keyCommondCallback(){
 void playerInit(){
 
   if(isFirstTimePlay){
-    cmdIdx = -1;    
+    cmdIdx = -1;
   }
 
   SYS_MODE=MODE_PAUSING;
@@ -363,6 +364,8 @@ void recordLoop(){
 
       // 计数
       cmdSize++;
+
+      freshSrcNow();
       
       Serial.print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>recording time:");
       Serial.print(c.ptime);
@@ -544,9 +547,11 @@ void infoDisplay() {
       u8g2.print("         短按暂停"); 
       break;
     case MODE_RECORD_WAITING:
-      u8g2.setFont(u8g2_font_wqy16_t_gb2312);  
-      u8g2.setCursor(44,38);
-      u8g2.print("录制中"); 
+      // u8g2.setFont(u8g2_font_wqy16_t_gb2312);  
+      // u8g2.setCursor(44,38);
+      // u8g2.print("录制中"); 
+      u8g2.print("等待指令");
+      cmdDataDis(); 
 
       // 操作提示
       u8g2.setFont(u8g2_font_wqy12_t_gb2312a);  
@@ -554,18 +559,20 @@ void infoDisplay() {
       u8g2.print("     短按退出录制"); 
       break;     
     case MODE_RECORDING:
-      if(cmdSize == MAX_CMD_SIZE){
-        // 第一行  pausing 1/100
-        u8g2.setFont(u8g2_font_wqy12_t_gb2312a);
-        u8g2.setCursor(CN_1st_LINE_X,TXT_1st_LINE_Y);
-        u8g2.print("已达存储上限");
-        cmdDataDis(); 
+      // if(cmdSize == MAX_CMD_SIZE){
+      //   // 第一行  pausing 1/100
+      //   u8g2.setFont(u8g2_font_wqy12_t_gb2312a);
+      //   u8g2.setCursor(CN_1st_LINE_X,TXT_1st_LINE_Y);
+      //   u8g2.print("已达存储上限");
+      //   cmdDataDis(); 
 
-      }else{
-        u8g2.setFont(u8g2_font_wqy16_t_gb2312);  
-        u8g2.setCursor(48,38);
-        u8g2.print("录制中"); 
-      }
+      // }else{
+      //   u8g2.setFont(u8g2_font_wqy16_t_gb2312);  
+      //   u8g2.setCursor(48,38);
+      //   u8g2.print("录制中"); 
+      // }
+      u8g2.print("录制中");
+      cmdDataDis(); 
 
       // 操作提示
       u8g2.setFont(u8g2_font_wqy12_t_gb2312a);  
